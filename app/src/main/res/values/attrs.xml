@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="PowerfulEditText">
+        <attr name="clearDrawable" format="reference"/>
+        <attr name="visibleDrawable" format="reference"/>
+        <attr name="invisibleDrawable" format="reference"/>
+
+        <attr name="BtnWidth" format="dimension"/>
+        <attr name="BtnSpacing" format="dimension"/>
+    </declare-styleable>
+</resources>

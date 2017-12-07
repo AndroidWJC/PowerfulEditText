@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <com.wang.powerfuledittext.PowerfulEditText
+        android:id="@+id/login_account"
+        android:hint="@string/hint_account"
+        app:clearDrawable="@drawable/clear_all"
+        android:singleLine="true"
+        android:layout_marginTop="30dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <com.wang.powerfuledittext.PowerfulEditText
+        android:id="@+id/login_password"
+        android:inputType="textPassword"
+        app:clearDrawable="@drawable/clear_all"
+        app:visibleDrawable="@drawable/visible"
+        app:invisibleDrawable="@drawable/invisible"
+        app:BtnWidth="@dimen/btn_edittext_width"
+        app:BtnSpacing="@dimen/btn_edittext_padding"
+        android:hint="@string/hint_password"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/test_shake"
+        android:text="晃动"
+        android:textSize="19dp"
+        android:textColor="@android:color/white"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginTop="20dp"
+        android:background="#4169e1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+
+</LinearLayout>
