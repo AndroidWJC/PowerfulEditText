@@ -1,17 +1,22 @@
 package com.wang.powerfuledittext;
 
+import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.RectF;
+import android.os.Build;
 import android.support.annotation.Nullable;
 import android.text.InputType;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Property;
 import android.view.MotionEvent;
 import android.view.animation.Animation;
 import android.view.animation.CycleInterpolator;
@@ -27,12 +32,22 @@ public class PowerfulEditText extends EditText {
     private static final int DEFAULT_VISIBLE_RES = R.drawable.visible;
     private static final int DEFAULT_INVISIBLE_RES = R.drawable.invisible;
 
+    private static final int DEFAULT_STYLE_COLOR = Color.BLUE;
+
     private final int DEFAULT_BUTTON_PADDING =
             getResources().getDimensionPixelSize(R.dimen.btn_edittext_padding);
     private final int DEFAULT_BUTTON_WIDTH =
             getResources().getDimensionPixelSize(R.dimen.btn_edittext_width);
 
+    private static final String STYLE_RECT = "rectangle";
+    private static final String STYLE_ROUND_RECT = "roundRect";
+    private static final String STYLE_HALF_RECT = "halfRect";
+    private static final String STYLE_ANIMATOR = "animator";
+
+    private static final int DEFAULT_ROUND_RADIUS = 20;
     private static final int ANIMATOR_TIME = 200;
+    private static final int DEFAULT_FOCUSED_STROKE_WIDTH = 8;
+    private static final int DEFAULT_UNFOCUSED_STROKE_WIDTH = 4;
 
     //按钮间隔
     private int mBtnPadding = 0;
@@ -48,6 +63,9 @@ public class PowerfulEditText extends EditText {
     private Bitmap mBitmapVisible;
     private Bitmap mBitmapInvisible;
 
+    private String mBorderStyle = "";
+    private int mStyleColor = -1;
+
     //出现和消失动画
     private ValueAnimator mGoneAnimator;
     private ValueAnimator mVisibleAnimator;
@@ -55,7 +73,24 @@ public class PowerfulEditText extends EditText {
     private boolean isBtnVisible = false;
     private boolean isPassword = false;
     private boolean isPasswordVisible = false;
-    private boolean isFocused = false;
+
+    private boolean isAnimatorRunning = false;
+    private int mAnimatorProgress = 0;
+    private ObjectAnimator mAnimator;
+
+    //自定义属性动画
+    private static final Property<PowerfulEditText, Integer> BORDER_PROGRESS
+            = new Property<PowerfulEditText, Integer>(Integer.class, "borderProgress") {
+        @Override
+        public Integer get(PowerfulEditText powerfulEditText) {
+            return powerfulEditText.getBorderProgress();
+        }
+
+        @Override
+        public void set(PowerfulEditText powerfulEditText, Integer value) {
+            powerfulEditText.setBorderProgress(value);
+        }
+    };
 
     private Paint mPaint;
 
@@ -103,20 +138,31 @@ public class PowerfulEditText extends EditText {
                     case R.styleable.PowerfulEditText_BtnSpacing:
                         mBtnPadding = array.getDimensionPixelSize(attr, DEFAULT_BUTTON_PADDING);
                         break;
+
+                    case R.styleable.PowerfulEditText_borderStyle:
+                        mBorderStyle = array.getString(attr);
+                        break;
+
+                    case R.styleable.PowerfulEditText_styleColor:
+                        mStyleColor = array.getColor(attr, DEFAULT_STYLE_COLOR);
+                        break;
                 }
             }
             array.recycle();
         }
 
+        //初始化按钮显示的Bitmap
         mBitmapClear = createBitmap(context, mClearResId, DEFAULT_CLEAR_RES);
         mBitmapVisible = createBitmap(context, mVisibleResId, DEFAULT_VISIBLE_RES);
         mBitmapInvisible = createBitmap(context, mInvisibleResId, DEFAULT_INVISIBLE_RES);
+        //如果自定义，则使用自定义的值，否则使用默认值
         if (mBtnPadding == 0) {
             mBtnPadding = DEFAULT_BUTTON_PADDING;
         }
         if (mBtnWidth == 0) {
             mBtnWidth = DEFAULT_BUTTON_WIDTH;
         }
+        //给文字设置一个padding，避免文字和按钮重叠了
         mTextPaddingRight = mBtnPadding * 4 + mBtnWidth * 2;
 
         //按钮出现和消失的动画
@@ -141,6 +187,84 @@ public class PowerfulEditText extends EditText {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
+        mPaint.setStyle(Paint.Style.STROKE);
+
+        //使用自定义颜色。如未定义，则使用默认颜色
+        if (mStyleColor != -1) {
+            mPaint.setColor(mStyleColor);
+        } else {
+            mPaint.setColor(DEFAULT_STYLE_COLOR);
+        }
+
+        //控件获取焦点时，加粗边框
+        if (isFocused()) {
+            mPaint.setStrokeWidth(DEFAULT_FOCUSED_STROKE_WIDTH);
+        } else {
+            mPaint.setStrokeWidth(DEFAULT_UNFOCUSED_STROKE_WIDTH);
+        }
+
+        //绘制清空和明文显示按钮
+        drawBorder(canvas);
+
+        //绘制边框
+        drawButtons(canvas);
+    }
+
+    private void drawBorder(Canvas canvas) {
+        int width = getWidth();
+        int height = getHeight();
+
+        switch (mBorderStyle) {
+            case STYLE_RECT:
+                setBackground(null);
+                canvas.drawRect(0, 0, width, height, mPaint);
+                break;
+
+            case STYLE_ROUND_RECT:
+                setBackground(null);
+                float roundRectLineWidth = 0;
+                if (isFocused()) {
+                    roundRectLineWidth = DEFAULT_FOCUSED_STROKE_WIDTH / 2;
+                } else {
+                    roundRectLineWidth = DEFAULT_UNFOCUSED_STROKE_WIDTH / 2;
+                }
+                mPaint.setStrokeWidth(roundRectLineWidth);
+                if (Build.VERSION.SDK_INT >= 21) {
+                    canvas.drawRoundRect(
+                            roundRectLineWidth/2, roundRectLineWidth/2, width - roundRectLineWidth/2, height - roundRectLineWidth/2,
+                            DEFAULT_ROUND_RADIUS, DEFAULT_ROUND_RADIUS,
+                            mPaint);
+                } else {
+                    canvas.drawRoundRect(
+                            new RectF(roundRectLineWidth/2, roundRectLineWidth/2, width - roundRectLineWidth/2, height - roundRectLineWidth/2),
+                            DEFAULT_ROUND_RADIUS, DEFAULT_ROUND_RADIUS,
+                            mPaint);
+                }
+                break;
+
+            case STYLE_HALF_RECT:
+                setBackground(null);
+                canvas.drawLine(0, height, width, height, mPaint);
+                canvas.drawLine(0, height / 2, 0, height, mPaint);
+                canvas.drawLine(width, height / 2, width, height, mPaint);
+                break;
+
+            case STYLE_ANIMATOR:
+                setBackground(null);
+                if (isAnimatorRunning) {
+                    Log.d(TAG, "wjc: onDraw animator mAnimatorProgress "+mAnimatorProgress);
+                    canvas.drawLine(width / 2 - mAnimatorProgress, height, width / 2 + mAnimatorProgress, height, mPaint);
+                    if (mAnimatorProgress == width / 2) {
+                        isAnimatorRunning = false;
+                    }
+                } else {
+                    canvas.drawLine(0, height, width, height, mPaint);
+                }
+                break;
+        }
+    }
+
+    private void drawButtons(Canvas canvas) {
         if (isBtnVisible) {
             if (mVisibleAnimator.isRunning()) {
                 float scale = (float) mVisibleAnimator.getAnimatedValue();
@@ -167,11 +291,6 @@ public class PowerfulEditText extends EditText {
         }
     }
 
-    /**
-     * 绘制清除按钮出现的图案
-     * @param scale 缩放比例
-     * @param canvas
-     */
     private void drawClearButton(float scale, Canvas canvas) {
 
         int right = (int) (getWidth() + getScrollX() - mBtnPadding - mBtnWidth * (1f - scale) / 2f);
@@ -220,7 +339,7 @@ public class PowerfulEditText extends EditText {
     @Override
     protected void onFocusChanged(boolean focused, int direction, Rect previouslyFocusedRect) {
         super.onFocusChanged(focused, direction, previouslyFocusedRect);
-        isFocused = focused;
+
         if (focused && getText().length() > 0) {
             if (!isBtnVisible) {
                 isBtnVisible = true;
@@ -232,6 +351,25 @@ public class PowerfulEditText extends EditText {
                 startGoneAnimator();
             }
         }
+
+        if (focused && mBorderStyle.equals(STYLE_ANIMATOR)) {
+            Log.d(TAG, "wjc: onFocusChanged: isAnimatorRunning = "+isAnimatorRunning);
+            isAnimatorRunning = true;
+            mAnimator = ObjectAnimator.ofInt(this, BORDER_PROGRESS, 0, getWidth() / 2);
+            mAnimator.setDuration(ANIMATOR_TIME);
+            mAnimator.start();
+        }
+    }
+
+    protected void setBorderProgress(int borderProgress) {
+        Log.d(TAG, "wjc: setBorderProgress: isAnimatorRunning = "+borderProgress);
+        mAnimatorProgress = borderProgress;
+        postInvalidate();
+    }
+
+    protected int getBorderProgress() {
+        Log.d(TAG, "wjc: getBorderProgress: run");
+        return mAnimatorProgress;
     }
 
     @Override
@@ -258,11 +396,11 @@ public class PowerfulEditText extends EditText {
             boolean clearTouched =
                     ( getWidth() - mBtnPadding - mBtnWidth < event.getX() )
                             && (event.getX() < getWidth() - mBtnPadding)
-                            && isFocused;
+                            && isFocused();
             boolean visibleTouched =
                     (getWidth() - mBtnPadding * 3 - mBtnWidth * 2 < event.getX())
                             && (event.getX() < getWidth() - mBtnPadding * 3 - mBtnWidth)
-                            && isPassword && isFocused;
+                            && isPassword && isFocused();
 
             if (clearTouched) {
                 setError(null);

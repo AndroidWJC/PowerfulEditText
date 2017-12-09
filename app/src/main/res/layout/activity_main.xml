@@ -6,11 +6,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+
     <com.wang.powerfuledittext.PowerfulEditText
-        android:id="@+id/login_account"
-        android:hint="@string/hint_account"
+        android:id="@+id/testOne"
+        android:hint="矩形样式"
         app:clearDrawable="@drawable/clear_all"
-        android:singleLine="true"
+        app:borderStyle="rectangle"
         android:layout_marginTop="30dp"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
@@ -18,14 +19,43 @@
         android:layout_height="wrap_content" />
 
     <com.wang.powerfuledittext.PowerfulEditText
-        android:id="@+id/login_password"
+        android:id="@+id/testTwo"
+        android:hint="圆角矩形样式"
+        android:inputType="textPassword"
+        app:clearDrawable="@drawable/clear_all"
+        app:visibleDrawable="@drawable/visible"
+        app:invisibleDrawable="@drawable/invisible"
+        app:borderStyle="roundRect"
+        app:styleColor="#008B8B"
+        android:layout_marginTop="30dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <com.wang.powerfuledittext.PowerfulEditText
+        android:id="@+id/testFour"
+        android:hint="动画特效样式"
+        app:clearDrawable="@drawable/clear_all"
+        app:borderStyle="animator"
+        app:styleColor="#00BFFF"
+        android:layout_marginTop="30dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <com.wang.powerfuledittext.PowerfulEditText
+        android:id="@+id/testThree"
         android:inputType="textPassword"
         app:clearDrawable="@drawable/clear_all"
         app:visibleDrawable="@drawable/visible"
         app:invisibleDrawable="@drawable/invisible"
         app:BtnWidth="@dimen/btn_edittext_width"
         app:BtnSpacing="@dimen/btn_edittext_padding"
-        android:hint="@string/hint_password"
+        app:borderStyle="halfRect"
+        app:styleColor="#ff0000"
+        android:hint="半矩形样式"
         android:layout_marginStart="20dp"
         android:layout_marginEnd="20dp"
         android:layout_marginTop="20dp"
