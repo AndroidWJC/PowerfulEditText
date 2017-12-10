@@ -215,11 +215,13 @@ public class PowerfulEditText extends EditText {
         int height = getHeight();
 
         switch (mBorderStyle) {
+            //矩形样式
             case STYLE_RECT:
                 setBackground(null);
                 canvas.drawRect(0, 0, width, height, mPaint);
                 break;
 
+            //圆角矩形样式
             case STYLE_ROUND_RECT:
                 setBackground(null);
                 float roundRectLineWidth = 0;
@@ -242,6 +244,7 @@ public class PowerfulEditText extends EditText {
                 }
                 break;
 
+            //半矩形样式
             case STYLE_HALF_RECT:
                 setBackground(null);
                 canvas.drawLine(0, height, width, height, mPaint);
@@ -249,10 +252,10 @@ public class PowerfulEditText extends EditText {
                 canvas.drawLine(width, height / 2, width, height, mPaint);
                 break;
 
+            //动画特效样式
             case STYLE_ANIMATOR:
                 setBackground(null);
                 if (isAnimatorRunning) {
-                    Log.d(TAG, "wjc: onDraw animator mAnimatorProgress "+mAnimatorProgress);
                     canvas.drawLine(width / 2 - mAnimatorProgress, height, width / 2 + mAnimatorProgress, height, mPaint);
                     if (mAnimatorProgress == width / 2) {
                         isAnimatorRunning = false;
@@ -266,6 +269,7 @@ public class PowerfulEditText extends EditText {
 
     private void drawButtons(Canvas canvas) {
         if (isBtnVisible) {
+            //播放按钮出现的动画
             if (mVisibleAnimator.isRunning()) {
                 float scale = (float) mVisibleAnimator.getAnimatedValue();
                 drawClearButton(scale, canvas);
@@ -273,6 +277,7 @@ public class PowerfulEditText extends EditText {
                     drawVisibleButton(scale, canvas, isPasswordVisible);
                 }
                 invalidate();
+            //绘制静态的按钮
             } else {
                 drawClearButton(1, canvas);
                 if (isPassword) {
@@ -280,6 +285,7 @@ public class PowerfulEditText extends EditText {
                 }
             }
         } else {
+            //播放按钮消失的动画
             if (mGoneAnimator.isRunning()) {
                 float scale = (float) mGoneAnimator.getAnimatedValue();
                 drawClearButton(scale, canvas);
@@ -340,6 +346,7 @@ public class PowerfulEditText extends EditText {
     protected void onFocusChanged(boolean focused, int direction, Rect previouslyFocusedRect) {
         super.onFocusChanged(focused, direction, previouslyFocusedRect);
 
+        //播放按钮出现和消失动画
         if (focused && getText().length() > 0) {
             if (!isBtnVisible) {
                 isBtnVisible = true;
@@ -352,8 +359,8 @@ public class PowerfulEditText extends EditText {
             }
         }
 
+        //实现动画特效样式
         if (focused && mBorderStyle.equals(STYLE_ANIMATOR)) {
-            Log.d(TAG, "wjc: onFocusChanged: isAnimatorRunning = "+isAnimatorRunning);
             isAnimatorRunning = true;
             mAnimator = ObjectAnimator.ofInt(this, BORDER_PROGRESS, 0, getWidth() / 2);
             mAnimator.setDuration(ANIMATOR_TIME);
@@ -362,13 +369,11 @@ public class PowerfulEditText extends EditText {
     }
 
     protected void setBorderProgress(int borderProgress) {
-        Log.d(TAG, "wjc: setBorderProgress: isAnimatorRunning = "+borderProgress);
         mAnimatorProgress = borderProgress;
         postInvalidate();
     }
 
     protected int getBorderProgress() {
-        Log.d(TAG, "wjc: getBorderProgress: run");
         return mAnimatorProgress;
     }
 
@@ -405,6 +410,7 @@ public class PowerfulEditText extends EditText {
             if (clearTouched) {
                 setError(null);
                 setText("");
+                return true;
             } else if (visibleTouched) {
                 if (isPasswordVisible) {
                     isPasswordVisible = false;
@@ -417,6 +423,7 @@ public class PowerfulEditText extends EditText {
                     setSelection(getText().length());
                     invalidate();
                 }
+                return true;
             }
         }
         return super.onTouchEvent(event);

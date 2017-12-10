@@ -5,8 +5,7 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-
-
+    
     <com.wang.powerfuledittext.PowerfulEditText
         android:id="@+id/testOne"
         android:hint="矩形样式"
