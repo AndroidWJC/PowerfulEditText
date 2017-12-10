@@ -1,8 +1,8 @@
 # PowerfulEditText
-自带一键清除按钮，密码显示与隐藏按钮，也可自定义资源。还有多种输入框样式可供选择
+自定义EditText，带一键清除和密码明文切换按钮（可以传入自定义图片资源），可以自定义边框颜色，支持四种边框样式的选择，支持控件抖动动画
 
 ## 效果图
-![](http://bmob-cdn-15184.b0.upaiyun.com/2017/12/07/bc6d46a940434dad8023c1567c3ef243.gif)
+![](http://bmob-cdn-15184.b0.upaiyun.com/2017/12/10/f174bcf840a6eea4800049f754739980.gif)
 
 ## xml配置
 ``` xml
@@ -22,7 +22,16 @@
         android:layout_height="wrap_content" />
 ```
 
+## 边框样式的对应规则如下
+1、矩形样式：		app:borderStyle="rectangle"
+2、半矩形样式：		app:borderStyle="halfRect"
+3、圆角矩形样式：	app:borderStyle="roundRect"
+4、动画特效样式：	app:borderStyle="animator"
+
 ## 摇晃
 ``` java
 mPEditText.startShakeAnimation();
 ```
+
+## 源码详解
+请见博客：http://blog.csdn.net/kuaiguixs/article/details/78745075
