@@ -63,7 +63,7 @@ public class PowerfulEditText extends EditText {
     private Bitmap mBitmapVisible;
     private Bitmap mBitmapInvisible;
 
-    private String mBorderStyle = "";
+    private String mBorderStyle = "animator";
     private int mStyleColor = -1;
 
     //出现和消失动画
@@ -115,39 +115,15 @@ public class PowerfulEditText extends EditText {
         //读取xml文件中的配置
         if (attrs != null) {
             TypedArray array = context.obtainStyledAttributes(attrs, R.styleable.PowerfulEditText);
-            for (int i = 0; i < array.getIndexCount(); i++) {
-                int attr = array.getIndex(i);
-
-                switch (attr) {
-                    case R.styleable.PowerfulEditText_clearDrawable:
-                        mClearResId = array.getResourceId(attr, DEFAULT_CLEAR_RES);
-                        break;
-
-                    case R.styleable.PowerfulEditText_visibleDrawable:
-                        mVisibleResId = array.getResourceId(attr, DEFAULT_VISIBLE_RES);
-                        break;
-
-                    case R.styleable.PowerfulEditText_invisibleDrawable:
-                        mInvisibleResId = array.getResourceId(attr, DEFAULT_INVISIBLE_RES);
-                        break;
-
-                    case R.styleable.PowerfulEditText_BtnWidth:
-                        mBtnWidth = array.getDimensionPixelSize(attr, DEFAULT_BUTTON_WIDTH);
-                        break;
-
-                    case R.styleable.PowerfulEditText_BtnSpacing:
-                        mBtnPadding = array.getDimensionPixelSize(attr, DEFAULT_BUTTON_PADDING);
-                        break;
-
-                    case R.styleable.PowerfulEditText_borderStyle:
-                        mBorderStyle = array.getString(attr);
-                        break;
-
-                    case R.styleable.PowerfulEditText_styleColor:
-                        mStyleColor = array.getColor(attr, DEFAULT_STYLE_COLOR);
-                        break;
-                }
+            mClearResId = array.getResourceId(R.styleable.PowerfulEditText_clearDrawable, DEFAULT_CLEAR_RES);
+            mVisibleResId = array.getResourceId(R.styleable.PowerfulEditText_visibleDrawable, DEFAULT_VISIBLE_RES);
+            mInvisibleResId = array.getResourceId(R.styleable.PowerfulEditText_invisibleDrawable, DEFAULT_INVISIBLE_RES);
+            mBtnWidth = array.getDimensionPixelSize(R.styleable.PowerfulEditText_BtnWidth, DEFAULT_BUTTON_WIDTH);
+            mBtnPadding = array.getDimensionPixelSize(R.styleable.PowerfulEditText_BtnSpacing, DEFAULT_BUTTON_PADDING);
+            if (!TextUtils.isEmpty(array.getString(R.styleable.PowerfulEditText_borderStyle))){
+                mBorderStyle = array.getString(R.styleable.PowerfulEditText_borderStyle);
             }
+            mStyleColor = array.getColor(R.styleable.PowerfulEditText_styleColor, DEFAULT_STYLE_COLOR);
             array.recycle();
         }
 
@@ -429,10 +405,14 @@ public class PowerfulEditText extends EditText {
         return super.onTouchEvent(event);
     }
 
-    // 开始晃动的入口
-    public void startShakeAnimation(){
+    /**
+     * 开始晃动的入口
+     *
+     * @param counts 0.5秒钟晃动多少下
+     */
+    public void startShakeAnimation(int counts){
         if(getAnimation() == null){
-            setAnimation(shakeAnimation(4));
+            setAnimation(shakeAnimation(counts));
         }
         startAnimation(getAnimation());
     }
@@ -451,10 +431,25 @@ public class PowerfulEditText extends EditText {
 
     private Bitmap createBitmap(Context context, int resId, int defResId) {
         if (resId != 0) {
-            return BitmapFactory.decodeResource(context.getResources(), resId);
+            return getBitmap(context, resId);
         } else {
-            return BitmapFactory.decodeResource(context.getResources(), defResId);
+            return getBitmap(context, defResId);
         }
+    }
+
+    private static Bitmap getBitmap(Context context, int vectorDrawableId) {
+        Bitmap bitmap;
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
+            Drawable vectorDrawable = context.getDrawable(vectorDrawableId);
+            bitmap = Bitmap.createBitmap(vectorDrawable.getIntrinsicWidth(),
+                    vectorDrawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+            vectorDrawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+            vectorDrawable.draw(canvas);
+        } else {
+            bitmap = BitmapFactory.decodeResource(context.getResources(), vectorDrawableId);
+        }
+        return bitmap;
     }
 }
 
